@@ -1,6 +1,6 @@
 # ProjetoSD2025Utad
 
-##### Projeto desenvolvivido no ambito de ___Sistemas Distribuidos___, na UTAD 2025
+##### Projeto desenvolvido no âmbito de ___Sistemas Distribuidos___, na UTAD 2025
 
 - Features:
 - Como Executar:
