@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wavy", "Wavy\Wavy.csproj", "{CBCEBE7E-92E4-4EAD-BC34-DDF53F89A529}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agregador", "Agregador\Agregador.csproj", "{0AA65C65-AE50-4820-8528-9644C04EA2E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Servidor", "Servidor\Servidor.csproj", "{A6ABFFF5-A6F1-4C94-8416-9C72E76CA567}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBCEBE7E-92E4-4EAD-BC34-DDF53F89A529}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBCEBE7E-92E4-4EAD-BC34-DDF53F89A529}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBCEBE7E-92E4-4EAD-BC34-DDF53F89A529}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBCEBE7E-92E4-4EAD-BC34-DDF53F89A529}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AA65C65-AE50-4820-8528-9644C04EA2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AA65C65-AE50-4820-8528-9644C04EA2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AA65C65-AE50-4820-8528-9644C04EA2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AA65C65-AE50-4820-8528-9644C04EA2E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6ABFFF5-A6F1-4C94-8416-9C72E76CA567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6ABFFF5-A6F1-4C94-8416-9C72E76CA567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6ABFFF5-A6F1-4C94-8416-9C72E76CA567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6ABFFF5-A6F1-4C94-8416-9C72E76CA567}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CD8F0416-58BD-4251-BD8F-5889EB61F91F}
+	EndGlobalSection
+EndGlobal
