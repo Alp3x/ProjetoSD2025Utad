@@ -4,26 +4,25 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-// Socket Listener acts as a server and listens to the incoming
-// messages on the specified port and protocol.
 public class SocketListener
 {
     private static Mutex mut = new Mutex();
     private const int maxNumThreads = 5;
+    
     public static int Main(String[] args)
     {
         StartServer();
         return 0;
     }
 
-    public static void AgregFunc()
+    public static void AgregFunc(Socket handler)
     {
-        Console.WriteLine("{0} is requesting the mutex\n",Thread.CurrentThread.Name);
-        mut.WaitOne();
-        byte[] msg;
-        // Incoming data from the client.
+        //Console.WriteLine("{0} is requesting the mutex\n",Thread.CurrentThread.Name);
+        //mut.WaitOne();
+        
         string data = null;
         byte[] bytes = null;
+        byte[] msg = null;
 
         while (true)
         {
@@ -32,16 +31,21 @@ public class SocketListener
             data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
             data.Split(" ");
 
+            Console.WriteLine("Text received : {0}", data);
+            msg = Encoding.ASCII.GetBytes(data);
+
             if (data.IndexOf("/n") > -1)
             {
                 break;
             }
         }
-        Console.WriteLine("Text received : {0}", data);
         msg = Encoding.ASCII.GetBytes(data);
+        handler.Send(msg);
+        handler.Shutdown(SocketShutdown.Both);
+        handler.Close();
 
-        mut.ReleaseMutex();
-        Console.WriteLine("{0} has released the mutex\n",Thread.CurrentThread.Name);
+        //mut.ReleaseMutex();
+        //Console.WriteLine("{0} has released the mutex\n",Thread.CurrentThread.Name);
     }
 
     public static void StartServer()
@@ -58,22 +62,19 @@ public class SocketListener
         {
             Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(localEndPoint);
-            listener.Listen(2);
 
-            Console.WriteLine("Waiting for a connection...");
-            Socket handler = listener.Accept();
-            if (numThreads < maxNumThreads)
+            while (true)
             {
-                Thread newThread = new Thread(new ThreadStart(AgregFunc));
+               
+                listener.Listen(10);
+
+                Console.WriteLine("Waiting for a connection...");
+                Socket handler = listener.Accept();
+                Thread newThread = new Thread(() => AgregFunc(handler));
                 newThread.Name = String.Format("WavyThread{0}", numThreads + 1);
-                numThreads++;
                 newThread.Start();
+
             }
-
-            handler.Send(msg);
-            handler.Shutdown(SocketShutdown.Both);
-            handler.Close();
-
         }
         catch (Exception e)
         {
