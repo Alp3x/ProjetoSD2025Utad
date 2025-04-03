@@ -17,7 +17,8 @@ public class SocketListener
 
     public static void AgregFunc(Socket handler)
     {
-        //Console.WriteLine("{0} is requesting the mutex\n",Thread.CurrentThread.Name);
+        Console.WriteLine("{0} oppened a connection and is running code\n",Thread.CurrentThread.Name);
+        Thread.Sleep(1000);
         //mut.WaitOne();
         
         string data = null;
@@ -39,13 +40,16 @@ public class SocketListener
                 break;
             }
         }
-        msg = Encoding.ASCII.GetBytes(data);
+        string textBack = "\nYour Data as been saved";
+        msg = Encoding.ASCII.GetBytes(textBack);
         handler.Send(msg);
         handler.Shutdown(SocketShutdown.Both);
         handler.Close();
 
+        Thread.Sleep(1000);
+
         //mut.ReleaseMutex();
-        //Console.WriteLine("{0} has released the mutex\n",Thread.CurrentThread.Name);
+        Console.WriteLine("{0} has stopped running code and closed connection\n",Thread.CurrentThread.Name);
     }
 
     public static void StartServer()
@@ -71,9 +75,8 @@ public class SocketListener
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
                 Thread newThread = new Thread(() => AgregFunc(handler));
-                newThread.Name = String.Format("WavyThread{0}", numThreads + 1);
+                newThread.Name = String.Format("Wavy{0}", numThreads + 1);
                 newThread.Start();
-
             }
         }
         catch (Exception e)
