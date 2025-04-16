@@ -36,26 +36,45 @@ public class SocketClient
             try
             {
               
-                    // Connect to Remote EndPoint
-                    sender.Connect(remoteEP);
+                // Connect to Remote EndPoint
+                sender.Connect(remoteEP);
 
-                    Console.WriteLine("Socket connected to {0}",
-                        sender.RemoteEndPoint.ToString());
+                Console.WriteLine("Socket connected to {0}",
+                    sender.RemoteEndPoint.ToString());
 
-                    // Encode the data string into a byte array.
-                    byte[] msg = Encoding.ASCII.GetBytes("This is a test /n");
+                // Encode the data string into a byte array.
+                byte[] msg = Encoding.ASCII.GetBytes("ScheduleRequest");
 
-                    // Send the data through the socket.
-                    int bytesSent = sender.Send(msg);
+                // Send the data through the socket.
+                int bytesSent = sender.Send(msg);
 
-                    // Receive the response from the remote device.
-                    int bytesRec = sender.Receive(bytes);
-                    Console.WriteLine("Echoed test = {0}",
-                        Encoding.ASCII.GetString(bytes, 0, bytesRec));
 
-                    // Release the socket.
-                    sender.Shutdown(SocketShutdown.Both);
-                    sender.Close();
+                // Receive the response from the remote device.
+                int bytesRec = sender.Receive(bytes);
+                if (Encoding.ASCII.GetString(bytes).Contains("yourSchedule"))
+                {
+                    Console.WriteLine("Data Recieved {0}",Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                    var DataSplit = Encoding.ASCII.GetString(bytes, 0, bytesRec).Split("-");
+                    DateTime dataSendSchedule = Convert.ToDateTime(DataSplit[1]);
+
+                    while (true)
+                    {
+                        if (dataSendSchedule == DateTime.Now)
+                        {
+                            // Encode the data string into a byte array.
+                            byte[] msgData = Encoding.ASCII.GetBytes("TimeIsUp Bitch Here DATA");
+
+                            // Send the data through the socket.
+                            int bytesSentDATA = sender.Send(msgData);
+                            Console.WriteLine("DATA SENT");
+                            break;
+                        }
+                    }
+                }
+
+                // Release the socket.
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
                 
 
             }

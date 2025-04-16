@@ -25,26 +25,52 @@ public class SocketListener
         byte[] bytes = null;
         byte[] msg = null;
 
-        while (true)
+        //while (true)
+        //{
+        //    bytes = new byte[1024];
+        //    int bytesRec = handler.Receive(bytes);
+        //    data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+        //    data.Split(" ");
+
+        //    Console.WriteLine("Text received : {0}", data);
+        //    msg = Encoding.ASCII.GetBytes(data);
+
+        //    if (data.IndexOf("/n") > -1)
+        //    {
+        //        break;
+        //    }
+        //}
+        bytes = new byte[1024];
+        int bytesRec = handler.Receive(bytes);
+        data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+        Console.WriteLine("Text received : {0}", data);
+
+        if (data == "ScheduleRequest")
         {
-            bytes = new byte[1024];
-            int bytesRec = handler.Receive(bytes);
-            data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-            data.Split(" ");
-
-            Console.WriteLine("Text received : {0}", data);
-            msg = Encoding.ASCII.GetBytes(data);
-
-            if (data.IndexOf("/n") > -1)
+            string tex = "yourSchedule-" + DateTime.Now.AddSeconds(10).ToString();
+            Console.WriteLine(tex);
+            msg = Encoding.ASCII.GetBytes(tex);
+            handler.Send(msg);
+            try
             {
-                break;
+                byte[] bytesData = null;
+                bytesData = new byte[1024];
+                int v = handler.Receive(bytesData);
+                string dataWavy = Encoding.ASCII.GetString(bytes, 0, v);
+                Console.WriteLine("Text received : {0}", dataWavy);
             }
+            catch (Exception e) {}
         }
+
         string textBack = "\nYour Data as been saved";
         msg = Encoding.ASCII.GetBytes(textBack);
         handler.Send(msg);
-        handler.Shutdown(SocketShutdown.Both);
-        handler.Close();
+        //handler.Shutdown(SocketShutdown.Both);
+        //handler.Close();
+        while (true)
+        {
+            
+        }
 
         Thread.Sleep(1000);
 
@@ -89,16 +115,6 @@ public class SocketListener
     }
 }
 
-
-
-
-
-
-
-
-// Client app is the one sending messages to a Server/listener.
-// Both listener and client can send messages back and forth once a
-// communication is established.
 //public class SocketClient
 //{
 //    public static int Main(String[] args)
