@@ -17,35 +17,46 @@ public class SocketListener
 
     public static void AgregFunc(Socket handler)
     {
-        //Console.WriteLine("{0} is requesting the mutex\n",Thread.CurrentThread.Name);
-        //mut.WaitOne();
+        Console.WriteLine("{0} oppened a connection and is running code\n",Thread.CurrentThread.Name);
+        Thread.Sleep(1000);
         
+
         string data = null;
+        string datarec = null;
         byte[] bytes = null;
         byte[] msg = null;
 
-        while (true)
-        {
-            bytes = new byte[1024];
-            int bytesRec = handler.Receive(bytes);
-            data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-            data.Split(" ");
+        bytes = new byte[1024];
 
-            Console.WriteLine("Text received : {0}", data);
-            msg = Encoding.ASCII.GetBytes(data);
-
-            if (data.IndexOf("/n") > -1)
+            
+            while (true)
             {
-                break;
-            }
-        }
-        msg = Encoding.ASCII.GetBytes(data);
-        handler.Send(msg);
-        handler.Shutdown(SocketShutdown.Both);
-        handler.Close();
+                int bytesRec = handler.Receive(bytes);
+                data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                
+                if (data == "ScheduleRequest")
+                {
+                    
+                    string tex = "yourSchedule-" + DateTime.Now.AddSeconds(10).ToString();
+                    Console.WriteLine(tex);
+                    msg = Encoding.ASCII.GetBytes(tex);
+                    handler.Send(msg);
+                }
 
-        //mut.ReleaseMutex();
-        //Console.WriteLine("{0} has released the mutex\n",Thread.CurrentThread.Name);
+                if (data.Contains("dataUpload"))
+                {  
+                    data.Split(":");
+                    datarec += data[1];              
+                    string textBack = "\nYour Data as been saved";
+                    msg = Encoding.ASCII.GetBytes(textBack);
+                    handler.Send(msg);
+                    break;
+                }
+            }
+            
+            EnviarParaServidor(datarec);
+            //mut.ReleaseMutex();
+            Console.WriteLine("{0} has stopped running code and closed connection\n",Thread.CurrentThread.Name);
     }
 
     public static void StartServer()
@@ -84,7 +95,47 @@ public class SocketListener
         Console.WriteLine("\n Press any key to continue...");
         Console.ReadKey();
     }
+
+
+
+     public static void EnviarParaServidor(string dados)
+    {
+        try
+        {
+            // Endereço do servidor (muda se necessário)
+            IPHostEntry host = Dns.GetHostEntry("localhost"); // ou IP fixo, tipo "192.168.1.100"
+            IPAddress ipAddress = host.AddressList[0];
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, 12000); // Porta do servidor
+
+            // Criar socket cliente
+            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            sender.Connect(remoteEP);
+
+            Console.WriteLine("Ligado ao servidor: " + remoteEP.ToString());
+
+            // Enviar dados
+            byte[] msg = Encoding.ASCII.GetBytes( dados);
+            sender.Send(msg);
+
+            // Esperar confirmação (opcional)
+            byte[] buffer = new byte[1024];
+            int bytesRec = sender.Receive(buffer);
+            string resposta = Encoding.ASCII.GetString(buffer, 0, bytesRec);
+            Console.WriteLine("Resposta do servidor: " + resposta);
+
+            // Fechar socket
+            sender.Shutdown(SocketShutdown.Both);
+            sender.Close();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Erro ao enviar para o servidor: " + e.Message);
+        }
+    }
+
 }
+
+
 
 
 

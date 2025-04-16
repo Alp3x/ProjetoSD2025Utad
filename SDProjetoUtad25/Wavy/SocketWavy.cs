@@ -14,10 +14,15 @@ public class SocketClient
         return 0;
     }
 
+    public static byte[] ReadData()
+    {
+        byte[] dados = File.ReadAllBytes("dadoswavy.txt");
+        return dados;
+    }
+
     public static void StartClient()
     {
         byte[] bytes = new byte[1024];
-
         try
         {
             // Connect to a Remote server
@@ -27,35 +32,45 @@ public class SocketClient
             IPHostEntry host = Dns.GetHostEntry("localhost");
             IPAddress ipAddress = host.AddressList[0];
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
-
             // Create a TCP/IP  socket.
             Socket sender = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
-
             // Connect the socket to the remote endpoint. Catch any errors.
             try
             {
+              
                 // Connect to Remote EndPoint
                 sender.Connect(remoteEP);
-
                 Console.WriteLine("Socket connected to {0}",
                     sender.RemoteEndPoint.ToString());
-
                 // Encode the data string into a byte array.
-                byte[] msg = Encoding.ASCII.GetBytes("This is a test /n");
-
+                byte[] msg = Encoding.ASCII.GetBytes("ScheduleRequest");
                 // Send the data through the socket.
                 int bytesSent = sender.Send(msg);
-
                 // Receive the response from the remote device.
                 int bytesRec = sender.Receive(bytes);
-                Console.WriteLine("Echoed test = {0}",
-                    Encoding.ASCII.GetString(bytes, 0, bytesRec));
-
+                if (Encoding.ASCII.GetString(bytes).Contains("yourSchedule"))
+                {
+                    Console.WriteLine("Data Recieved {0}",Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                    var DataSplit = Encoding.ASCII.GetString(bytes, 0, bytesRec).Split("-");
+                    DateTime dataSendSchedule = Convert.ToDateTime(DataSplit[1]);
+                    while (true)
+                    {
+                        if (dataSendSchedule == DateTime.Now)
+                        {
+                            // Encode the data string into a byte array.
+                            byte[] msgData = ReadData();
+                            // Send the data through the socket.
+                            int bytesSentDATA = sender.Send(msgData);
+                            Console.WriteLine("DATA SENT");
+                            break;
+                        }
+                    }
+                }
                 // Release the socket.
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
-
+                
             }
             catch (ArgumentNullException ane)
             {
@@ -69,11 +84,11 @@ public class SocketClient
             {
                 Console.WriteLine("Unexpected exception : {0}", e.ToString());
             }
-
         }
         catch (Exception e)
         {
             Console.WriteLine(e.ToString());
         }
+    
     }
 }
