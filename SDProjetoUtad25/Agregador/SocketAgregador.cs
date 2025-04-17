@@ -43,7 +43,7 @@ public class SocketListener
 
         lock (syncLock) // Ensure thread-safe access
         {
-            fullData.Append(DataSplit[1]); // Append data safely
+            fullData.Append(DataSplit[1] + " "); // Append data safely
         }
 
         Console.WriteLine("-> Data Received from {0}\n {1}\n", Thread.CurrentThread.Name, DataSplit[1]);
@@ -55,7 +55,7 @@ public class SocketListener
     public static void AgregFunc(Socket handler,DateTime sendDataScheduleServer,StringBuilder fullData, ManualResetEventSlim communicationAllowed, Socket server)
     {
         Console.WriteLine("{0} oppened a connection and is running code\n",Thread.CurrentThread.Name);
-        fullData.Append(Thread.CurrentThread.Name + " data :\n");
+
 
         string data = null;
         byte[] bytes = null;
