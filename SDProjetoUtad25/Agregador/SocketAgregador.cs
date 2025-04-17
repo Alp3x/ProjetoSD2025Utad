@@ -30,7 +30,7 @@ public class SocketListener
     }
 
     //Func responsavel por receber os dados do wavy
-    public static void sendData(Socket handler, string data,string fullData)
+    public static void sendData(Socket handler, string data, ref string fullData)
     {
         byte[] msg = null;
         Console.WriteLine("{0}", data);
@@ -42,7 +42,7 @@ public class SocketListener
         }
         fullData = fullData + DataSplit[1];
         Console.WriteLine("->Data Recieved from {0}\n {1}\n", Thread.CurrentThread.Name, DataSplit[1]);
-        string textBack = "Your Data as been saved";
+        string textBack = "Your Data has been saved";
         msg = Encoding.ASCII.GetBytes(textBack);
         handler.Send(msg);
     }
@@ -69,6 +69,7 @@ public class SocketListener
                     {
                         if (!hasSentData)
                         {
+                            Console.WriteLine("O Conteudo de fullData é{0}:",fullData);
                             EnviarParaServidor(fullData,server);
                             sendDataScheduleServer.AddMinutes(2);
                             Console.WriteLine("->Schedule set to {0}", sendDataScheduleServer.ToString());
@@ -82,7 +83,7 @@ public class SocketListener
                 }
                 if (data.Contains("dataUpload-"))
                 {
-                    sendData(handler, data,fullData);
+                    sendData(handler, data, ref fullData);
                     sendSchedule(handler);
                 }
             }
@@ -139,11 +140,6 @@ public class SocketListener
 
         Console.WriteLine("\n Press any key to continue...");
         Console.ReadKey();
-    }
-    public static byte[] ReadData()
-    {
-        byte[] dados = File.ReadAllBytes("dadoswavy.txt");
-        return dados;
     }
     
     public static void EnviarParaServidor(string dados,Socket server)
