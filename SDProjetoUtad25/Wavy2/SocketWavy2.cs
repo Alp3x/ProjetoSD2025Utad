@@ -38,7 +38,8 @@ public class SocketClient
 
                 sender.Connect(remoteEP);
 
-                Console.WriteLine("->Socket connected to {0}",sender.RemoteEndPoint.ToString());
+                Console.WriteLine("->Socket connected to {0}",
+                    sender.RemoteEndPoint.ToString());
 
                 byte[] msg = Encoding.ASCII.GetBytes("scheduleRequest");
 
@@ -53,22 +54,26 @@ public class SocketClient
                         var DataSplit = Data.Split("-");
                         DateTime dataSendSchedule = Convert.ToDateTime(DataSplit[1]);
                         Console.WriteLine("->Schedule set to {0}", DataSplit[1]);
+
                         while (true) // Checks if it has to deliver data. After it deliver its data e it will wait to receive a new schedule
                         {
-                            if (Math.Abs((DateTime.Now - dataSendSchedule).TotalSeconds) <= 4)
-                            {
-                                byte[] msgData = Encoding.ASCII.GetBytes("dataUpload- Here is wavy data");
+                            
+                                if (Math.Abs((DateTime.Now - dataSendSchedule).TotalSeconds) <= 4)
+                                {
+                                    byte[] msgData = Encoding.ASCII.GetBytes("dataUpload- Here is wavy data");
 
-                                int bytesSentDATA = sender.Send(msgData);
-                                Console.WriteLine("-> dataUploadComplete\n");
-                                break;
-                            }
-                            //if (dataSendSchedule < DateTime.Now)
-                            //{
-                            //    byte[] msgData = Encoding.ASCII.GetBytes("scheduleRequest");
-                            //    int coco = sender.Send(msgData);
-                            //    break;
-                            //}
+                                    int bytesSentDATA = sender.Send(msgData);
+                                    Console.WriteLine("-> dataUploadComplete\n");
+                                    break;
+                                }
+                               
+                                //if (dataSendSchedule < DateTime.Now)
+                                //{
+                                //    byte[] msgData = Encoding.ASCII.GetBytes("scheduleRequest");
+                                //    int coco = sender.Send(msgData);
+                                //    break;
+                                //}
+                            
                         }
                     }
                 }
