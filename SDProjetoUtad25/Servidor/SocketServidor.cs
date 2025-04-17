@@ -21,30 +21,38 @@ public class SocketListener
         IPHostEntry host = Dns.GetHostEntry("localhost");
         IPAddress ipAddress = host.AddressList[0];
         IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 1000);
-        while (true)
+        Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        int numThreads = 0;
+        listener.Bind(localEndPoint);
+        try
         {
 
-            try
+            while (true)
             {
-                Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                listener.Bind(localEndPoint);
-                listener.Listen(10);
-
-                Console.WriteLine("Awaiting connection");
-
-                while (true)
+                try
                 {
-                    Socket handler = listener.Accept();
-                    Console.WriteLine("Client conected.");
-                    Thread clientThread = new Thread(() => HandleClient(handler));
-                    clientThread.Start();
+
+                    listener.Listen(10);
+
+                    Console.WriteLine("Awaiting connection");
+
+                    while (true)
+                    {
+                        Socket handler = listener.Accept();
+                        Console.WriteLine("Client conected.");
+                        Thread agregadorThread = new Thread(() => HandleClient(handler));
+                        agregadorThread.Name = System.String.Format("Agregador{0}", numThreads + 1);
+                        agregadorThread.Start();
+                        numThreads++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
         }
+        catch (Exception e) { Console.WriteLine(e.ToString()); }
     }
     public static void HandleClient(Socket handler)
     {
@@ -59,7 +67,7 @@ public class SocketListener
             mutex.WaitOne();
             try
             {
-                File.AppendAllText("dados_recebidos.txt", data + Environment.NewLine);
+                File.AppendAllText("dados_recebidos.txt", Thread.CurrentThread.Name + "\n" + data + Environment.NewLine);
             }
             catch (Exception e)
             {

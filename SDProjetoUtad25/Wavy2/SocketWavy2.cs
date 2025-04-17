@@ -14,6 +14,12 @@ public class SocketClient
         return 0;
     }
 
+    public static byte[] ReadData()
+    {
+        byte[] dados = File.ReadAllBytes("dadoswavy2.txt");
+        return dados;
+    }
+
     public static void StartClient()
     {
         byte[] bytes = new byte[1024];
@@ -60,9 +66,9 @@ public class SocketClient
                             
                                 if (Math.Abs((DateTime.Now - dataSendSchedule).TotalSeconds) <= 4)
                                 {
-                                    byte[] msgData = Encoding.ASCII.GetBytes("dataUpload- Here is wavy data");
+                                    byte[] msgData = Encoding.ASCII.GetBytes("dataUpload-" + Encoding.ASCII.GetString(ReadData()));
 
-                                    int bytesSentDATA = sender.Send(msgData);
+                                int bytesSentDATA = sender.Send(msgData);
                                     Console.WriteLine("-> dataUploadComplete\n");
                                     break;
                                 }

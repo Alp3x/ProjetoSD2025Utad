@@ -11,8 +11,9 @@ public class SocketListener
     private static Mutex mut = new Mutex();
     private const int maxNumThreads = 5;
     // Static to coordinate between threads (put this at class level)
-    private static object syncLock = new object();
+    private static object syncLock = new object(); // Already defined in your code
     private static bool hasSentData = false; // Also make this static to share across threads
+    private static StringBuilder fullData = new StringBuilder(); // Shared across threads
 
     public static int Main(System.String[] args)
     {
@@ -30,27 +31,31 @@ public class SocketListener
     }
 
     //Func responsavel por receber os dados do wavy
-    public static void sendData(Socket handler, string data, ref string fullData)
+    public static void sendData(Socket handler,string data, StringBuilder fullData)
     {
         byte[] msg = null;
-        Console.WriteLine("{0}", data);
-        var DataSplit = data.Split("-");
+        var DataSplit = data.ToString().Split("-");
         if (DataSplit.Length < 2)
         {
             Console.WriteLine("-> Error: Data not received");
             return;
         }
-        fullData = fullData + DataSplit[1];
-        Console.WriteLine("->Data Recieved from {0}\n {1}\n", Thread.CurrentThread.Name, DataSplit[1]);
+
+        lock (syncLock) // Ensure thread-safe access
+        {
+            fullData.Append(DataSplit[1]); // Append data safely
+        }
+
+        Console.WriteLine("-> Data Received from {0}\n {1}\n", Thread.CurrentThread.Name, DataSplit[1]);
         string textBack = "Your Data has been saved";
         msg = Encoding.ASCII.GetBytes(textBack);
         handler.Send(msg);
     }
 
-    public static void AgregFunc(Socket handler,DateTime sendDataScheduleServer,string fullData, ManualResetEventSlim communicationAllowed, Socket server)
+    public static void AgregFunc(Socket handler,DateTime sendDataScheduleServer,StringBuilder fullData, ManualResetEventSlim communicationAllowed, Socket server)
     {
         Console.WriteLine("{0} oppened a connection and is running code\n",Thread.CurrentThread.Name);
-        fullData += Thread.CurrentThread.Name + " data :\n";
+        fullData.Append(Thread.CurrentThread.Name + " data :\n");
 
         string data = null;
         byte[] bytes = null;
@@ -65,17 +70,13 @@ public class SocketListener
                 data = Encoding.ASCII.GetString(bytes, 0, bytesRec);
                 if (Math.Abs((DateTime.Now - sendDataScheduleServer).TotalSeconds) <= 4)
                 {
-                    lock (syncLock)
+                    if (!hasSentData)
                     {
-                        if (!hasSentData)
-                        {
-                            Console.WriteLine("O Conteudo de fullData é{0}:",fullData);
-                            EnviarParaServidor(fullData,server);
-                            sendDataScheduleServer.AddMinutes(2);
-                            Console.WriteLine("->Schedule set to {0}", sendDataScheduleServer.ToString());
-                            hasSentData = false;
-                        }
-                    };
+                        EnviarParaServidor(fullData.ToString(),server);
+                        sendDataScheduleServer.AddMinutes(2);
+                        Console.WriteLine("-> Schedule set to {0}", sendDataScheduleServer.ToString());
+                        hasSentData = false;
+                    }
                 }
                 if (data == "scheduleRequest")
                 {
@@ -83,7 +84,7 @@ public class SocketListener
                 }
                 if (data.Contains("dataUpload-"))
                 {
-                    sendData(handler, data, ref fullData);
+                    sendData(handler,data,fullData);
                     sendSchedule(handler);
                 }
             }
@@ -103,20 +104,16 @@ public class SocketListener
         DateTime dataSendSchedule = DateTime.Now.AddSeconds(30);
         Console.WriteLine("->Schedule set to {0}", dataSendSchedule.ToString());
         Console.WriteLine(dataSendSchedule);
-        string fullData = "Agregador #1 :\n";
-
+        IPHostEntry hostServer = Dns.GetHostEntry("localhost");
+        IPAddress ipAddressServer = hostServer.AddressList[0];
+        IPEndPoint remoteEPServer = new IPEndPoint(ipAddressServer, 1000);
+        Socket server = new Socket(ipAddressServer.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
         try
         {
-            IPHostEntry hostServer = Dns.GetHostEntry("localhost");
-            IPAddress ipAddressServer = hostServer.AddressList[0];
-            IPEndPoint remoteEPServer = new IPEndPoint(ipAddressServer, 1000); // Porta do servidor
-
-            // Criar socket cliente
-            Socket server = new Socket(ipAddressServer.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             server.Connect(remoteEPServer);
 
-            Console.WriteLine("Ligado ao servidor: " + remoteEPServer.ToString());
+            Console.WriteLine("connected to: " + remoteEPServer.ToString());
 
             Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(localEndPoint);

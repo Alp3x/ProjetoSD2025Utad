@@ -1,42 +1,5 @@
-Agregador #1 :
+Agregador1
+Wavy1 data :
+
 Wavy2 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy2 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy2 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy2 data :
-
-Agregador #1 :
-Wavy1 data :
-
-Agregador #1 :
-Wavy1 data :
-
+This is the wavy2 data 4321, trip nice haveThis is the wavy data 1234, have a nice tripThis is the wavy2 data 4321, trip nice haveThis is the wavy data 1234, have a nice tripThis is the wavy2 data 4321, trip nice haveThis is the wavy data 1234, have a nice trip
