@@ -48,7 +48,6 @@ public class SocketClient
                 // Send the data through the socket.
                 int bytesSent = sender.Send(msg);
 
-
                 // Receive the response from the remote device.
                 int bytesRec = sender.Receive(bytes);
                 if (Encoding.ASCII.GetString(bytes).Contains("yourSchedule"))
@@ -62,17 +61,16 @@ public class SocketClient
                         if (dataSendSchedule == DateTime.Now)
                         {
                             // Encode the data string into a byte array.
-                            byte[] msgData = Encoding.ASCII.GetBytes("TimeIsUp Bitch Here DATA");
+                            byte[] msgData = Encoding.ASCII.GetBytes("dataUpload:TimeIsUp Bitch Here DATA");
 
                             // Send the data through the socket.
                             int bytesSentDATA = sender.Send(msgData);
-                            Console.WriteLine("DATA SENT");
+                            Console.WriteLine("DATA SENT {0}",msgData);
                             break;
                         }
                     }
                 }
-
-                // Release the socket.
+                
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
                 
