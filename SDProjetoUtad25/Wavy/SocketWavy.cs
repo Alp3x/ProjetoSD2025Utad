@@ -3,9 +3,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-// Client app is the one sending messages to a Server/listener.
-// Both listener and client can send messages back and forth once a
-// communication is established.
 public class SocketClient
 {
     public static int Main(String[] args)
@@ -27,19 +24,13 @@ public class SocketClient
 
         try
         {
-            // Connect to a Remote server
-            // Get Host IP Address that is used to establish a connection
-            // In this case, we get one IP address of localhost that is IP : 127.0.0.1
-            // If a host has multiple addresses, you will get a list of addresses
             IPHostEntry host = Dns.GetHostEntry("localhost");
             IPAddress ipAddress = host.AddressList[0];
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, 11000);
 
-            // Create a TCP/IP  socket.
             Socket sender = new Socket(ipAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
 
-            // Connect the socket to the remote endpoint. Catch any errors.
             try
             {
 
@@ -70,12 +61,6 @@ public class SocketClient
                                 Console.WriteLine("-> dataUploadComplete\n");
                                 break;
                             }
-                            //if (dataSendSchedule < DateTime.Now)
-                            //{
-                            //    byte[] msgData = Encoding.ASCII.GetBytes("scheduleRequest");
-                            //    int coco = sender.Send(msgData);
-                            //    break;
-                            //}
                         }
                     }
                 }

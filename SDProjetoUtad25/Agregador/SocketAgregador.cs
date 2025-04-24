@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -10,10 +11,9 @@ public class SocketListener
 {
     private static Mutex mut = new Mutex();
     private const int maxNumThreads = 5;
-    // Static to coordinate between threads (put this at class level)
-    private static object syncLock = new object(); // Already defined in your code
-    private static bool hasSentData = false; // Also make this static to share across threads
-    private static StringBuilder fullData = new StringBuilder(); // Shared across threads
+    private static object syncLock = new object(); 
+    private static bool hasSentData = false; 
+    private static StringBuilder fullData = new StringBuilder();
 
     public static int Main(System.String[] args)
     {
@@ -21,7 +21,6 @@ public class SocketListener
         return 0;
     }
 
-    //func que atribui um horario para o wavy
     public static void sendSchedule(Socket handler) {
         byte[] msg = null;
         string tex = "setSchedule-" + DateTime.Now.AddSeconds(10).ToString();
@@ -30,7 +29,7 @@ public class SocketListener
         Console.WriteLine("-> Schedule sent to {0}\n", Thread.CurrentThread.Name);
     }
 
-    //Func responsavel por receber os dados do wavy
+
     public static void sendData(Socket handler,string data, StringBuilder fullData)
     {
         byte[] msg = null;
@@ -41,9 +40,9 @@ public class SocketListener
             return;
         }
 
-        lock (syncLock) // Ensure thread-safe access
+        lock (syncLock)
         {
-            fullData.Append(DataSplit[1] + " "); // Append data safely
+            fullData.Append(DataSplit[1] + " ");
         }
 
         Console.WriteLine("-> Data Received from {0}\n {1}\n", Thread.CurrentThread.Name, DataSplit[1]);
@@ -52,7 +51,7 @@ public class SocketListener
         handler.Send(msg);
     }
 
-    public static void AgregFunc(Socket handler,DateTime sendDataScheduleServer,StringBuilder fullData, ManualResetEventSlim communicationAllowed, Socket server)
+    public static void AgregFunc(Socket handler,DateTime sendDataScheduleServer,StringBuilder fullData, ManualResetEventSlim communicationAllowed)
     {
         Console.WriteLine("{0} oppened a connection and is running code\n",Thread.CurrentThread.Name);
 
@@ -64,19 +63,20 @@ public class SocketListener
         bytes = new byte[1024];
         while (true)
         {
+        
             try
             {
                 int bytesRec = handler.Receive(bytes);
                 data = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                if (Math.Abs((DateTime.Now - sendDataScheduleServer).TotalSeconds) <= 4)
+                if (Math.Abs((DateTime.Now - sendDataScheduleServer).TotalSeconds) <= 5)
                 {
-                    if (!hasSentData)
-                    {
-                        EnviarParaServidor(fullData.ToString(),server);
-                        sendDataScheduleServer.AddMinutes(2);
-                        Console.WriteLine("-> Schedule set to {0}", sendDataScheduleServer.ToString());
-                        hasSentData = false;
-                    }
+                    sendDataScheduleServer = sendDataScheduleServer.AddSeconds(30);
+                    EnviarParaServidor(fullData.ToString());
+                    Console.WriteLine("-> Schedule set to {0}", sendDataScheduleServer.ToString());
+                    fullData.Clear();
+                    hasSentData = false;
+                    //sendSchedule(handler);
+                    
                 }
                 if (data == "scheduleRequest")
                 {
@@ -104,16 +104,10 @@ public class SocketListener
         DateTime dataSendSchedule = DateTime.Now.AddSeconds(30);
         Console.WriteLine("->Schedule set to {0}", dataSendSchedule.ToString());
         Console.WriteLine(dataSendSchedule);
-        IPHostEntry hostServer = Dns.GetHostEntry("localhost");
-        IPAddress ipAddressServer = hostServer.AddressList[0];
-        IPEndPoint remoteEPServer = new IPEndPoint(ipAddressServer, 1000);
-        Socket server = new Socket(ipAddressServer.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
 
         try
         {
-            server.Connect(remoteEPServer);
-
-            Console.WriteLine("connected to: " + remoteEPServer.ToString());
 
             Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(localEndPoint);
@@ -123,7 +117,7 @@ public class SocketListener
 
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
-                Thread newThread = new Thread(() => AgregFunc(handler,dataSendSchedule,fullData, communicationAllowed, server));
+                Thread newThread = new Thread(() => AgregFunc(handler,dataSendSchedule,fullData, communicationAllowed));
                 newThread.Name = System.String.Format("Wavy{0}", numThreads + 1);
                 newThread.Start();
                 numThreads++;
@@ -139,12 +133,20 @@ public class SocketListener
         Console.ReadKey();
     }
     
-    public static void EnviarParaServidor(string dados,Socket server)
+    public static void EnviarParaServidor(string dados)
     {
         try
         {
-            
-            byte[] msg = Encoding.ASCII.GetBytes(dados);
+            IPHostEntry hostServer = Dns.GetHostEntry("localhost");
+            IPAddress ipAddressServer = hostServer.AddressList[0];
+            IPEndPoint remoteEPServer = new IPEndPoint(ipAddressServer, 1000);
+            Socket server = new Socket(ipAddressServer.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            server.Connect(remoteEPServer);
+
+            Console.WriteLine("connected to: " + remoteEPServer.ToString());
+
+
+            byte[] msg = Encoding.ASCII.GetBytes("agregToServer" + dados);
             server.Send(msg);
  
             byte[] buffer = new byte[1024];
@@ -153,6 +155,11 @@ public class SocketListener
             Console.WriteLine("Server Response " + resposta);
             
             hasSentData = true;
+            server.Shutdown(SocketShutdown.Both);
+            server.Close();
+            Console.WriteLine("Closed Socket");
+            
+
         }
         catch (Exception e)
         {

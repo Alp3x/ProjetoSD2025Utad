@@ -5,8 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
-// Socket Listener acts as a server and listens to the incoming
-// messages on the specified port and protocol.
+
 public class SocketListener
 {
     private static Mutex mutex = new Mutex();
@@ -26,7 +25,6 @@ public class SocketListener
         listener.Bind(localEndPoint);
         try
         {
-
             while (true)
             {
                 try
@@ -58,31 +56,37 @@ public class SocketListener
     {
         string data = "";
         byte[] bytes = new byte[1024];
-
-        try
-        {
-            int bytesRec = handler.Receive(bytes);
-            data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-            Console.WriteLine("Text recieved: {0}", data);
-            mutex.WaitOne();
+        
             try
             {
-                File.AppendAllText("dados_recebidos.txt", Thread.CurrentThread.Name + "\n" + data + Environment.NewLine);
+                int bytesRec = handler.Receive(bytes);
+                data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                if (data.Contains("agregToServer")) {
+                    Console.WriteLine("Text recieved: {0}", data);
+                    mutex.WaitOne();
+                    try
+                    {
+                        File.AppendAllText("dados_recebidos.txt", Thread.CurrentThread.Name + "\n" + data + Environment.NewLine);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                    mutex.ReleaseMutex();
+
+                    Console.WriteLine("Data received sucessfullyn\n");
+                    byte[] msg = Encoding.ASCII.GetBytes("Data received sucessfully\n");
+                    handler.Send(msg);
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                    Console.WriteLine("Socket Closed");
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-            mutex.ReleaseMutex();
-
-            Console.WriteLine("Data received sucessfullyn\n");
-            byte[] msg = Encoding.ASCII.GetBytes("Data received sucessfully\n");
-            handler.Send(msg);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine( e.Message);
-        }
+        
     }
 }
 
